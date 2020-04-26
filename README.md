@@ -2,7 +2,10 @@
 Crypto Course Project
 
 After cloning:
-  $ pip3 install -r requirements.txt
+  $ pip install -r requirements.txt
+  
+  Windows users can follow this: https://flask.palletsprojects.com/en/1.1.x/cli/#application-discovery
+  
   
   $ export FLASK_APP=node_server.py
   
