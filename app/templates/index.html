@@ -1,0 +1,28 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+	<br>
+
+	<center>
+	<form action="/submit" id="textform" method="post">
+	    <br>
+	    <input type="text" name="sender" placeholder="Write Sender Name">
+	    <input type="text" name="receiver" placeholder="Write Receiver Name">
+	    <input type="number" name="transact" placeholder="Amount being transferred">
+		<input type="submit" value="Verify and Add Transaction">
+	</form>
+	<br>
+	<form action="{{node_address}}/viewuser" id="textform" method="post">
+		<input type="text" name = "user" placeholder="Name of User">
+		<input type="submit" value="View User">
+	</form>
+	</center>
+
+	<br>
+
+	<a href="{{node_address}}/mineBlock" target="_blank"><button>Request to mine</button></a>
+	<a href="/"><button>Resync</button></a>
+	<div style="margin: 20px;">
+
+{% endblock %}
