@@ -7,6 +7,9 @@ import random
 g=2
 p=11
 def zeroKnowlege(x):
+    """
+    Performs calculations to avoid attacks  
+    """
     y = (g**x)%p
     r = random.randint(0,p-1)
     h=(g**r)%p
@@ -16,8 +19,11 @@ def zeroKnowlege(x):
     if(bobshouldsend==verifyZK2(g,s,p)):
         return True
     return False
-def verifyZK(h,g,r,p):return random.randint(0,1)
-def verifyZK2(g,s,p):return (g**s)%p
+def verifyZK(h,g,r,p):
+    return random.randint(0,1)
+
+def verifyZK2(g,s,p):
+    return (g**s)%p
 
 class Block:
     def __init__(self,index,transactions,timestamp,previous_hash):
@@ -28,6 +34,9 @@ class Block:
     # one way hash
     # very difficult to obtain key from value
     def hash_it(self):
+        """
+        A function that return the hash of the block contents.
+        """
         str_of_block = json.dumps(self.__dict__,sort_keys=True)
         return sha256(str_of_block.encode()).hexdigest()
 
@@ -39,6 +48,11 @@ class Chain_of_blocks:
         self.new_transactions=[]
 
     def create_zero_block(self):
+        """
+        A function to create the zero block.
+        The block has index 0, previous_hash as 0, and
+        a valid hash.
+        """
         zero_block = Block(0,[],time.time(),"0")
         zero_block.hash=zero_block.hash_it()
         self.blockchain.append(zero_block)
@@ -47,6 +61,10 @@ class Chain_of_blocks:
         return self.blockchain[-1]
 
     def proof_of_work(self,block):
+        """
+        Function that tries different values of nonce to get a hash
+        that proves our difficulty criteria.
+        """
         block.fpw = 0
         hashed_block = block.hash_it()
         while not hashed_block[:4]=="0000" :
@@ -55,6 +73,13 @@ class Chain_of_blocks:
         return hashed_block
     
     def createBlock(self, block, pOw):
+        """
+        A function that creates and adds the block to the chain after verifying it.
+        Verification done by:
+        -Checking if the proof is correct.
+        -The last hash referred in the block and the hash of latest block
+          in the chain are same.
+        """
         if(self.last_block().hash != block.previous_hash):
             return False
         
@@ -67,6 +92,9 @@ class Chain_of_blocks:
         return hashof[:4]=="0000" and hashof==block.hash_it()
     
     def verifyTransaction(self,transaction):
+        """
+        Check validity of transaction before adding the block to the chain
+        """
         if(zeroKnowlege(len(transaction["sender"]))):
             self.new_transactions.append(transaction)
             return True
@@ -74,6 +102,11 @@ class Chain_of_blocks:
             return False
 
     def mineBlock(self):
+        """
+        This function adds the unconfirmed
+        exchanges to the blockchain
+        and figures out Proof Of Work.
+        """
         if not self.new_transactions:
             return False
         print("henlo")
@@ -85,6 +118,9 @@ class Chain_of_blocks:
         return new_block.index
     
     def viewUser(self,user):
+        """
+        Outputs all the transactions performed by the user,thus helping them 
+        keep track of their transactions"""
         tore=[]
         for i in self.blockchain:
             for j in i.transactions:
@@ -94,7 +130,7 @@ class Chain_of_blocks:
 
     def isValidChain(self, chain):
         """
-        A helper method to check if the entire blockchain is valid.            
+        A method to check if the entire blockchain is valid.            
         """
         result = True
         previous_hash = "0"
@@ -230,6 +266,11 @@ def add_peers():
 
 @webapp.route('/add_this_to_exis', methods=['POST'])
 def add_this_to_exis():
+    """
+    Internally calls the `register_node` endpoint to
+    add current node with the node mentioned in the
+    request, and sync everything.
+    """
     node_address = request.get_json()["node_address"]
     if not node_address:
         return "Invalid data", 400
@@ -272,6 +313,9 @@ def create_chain_from_dump(drop_chain):
 
 @webapp.route('/add_new_block', methods=['POST'])
 def verify_and_add_block():
+    """
+    Adds block after verification
+    """
     j = request.get_json()
     block = Block(j["index"],
                   j["transactions"],
@@ -288,6 +332,11 @@ def verify_and_add_block():
 
 
 def announce_new_block(block):
+    """
+    Announces to the network once a block has been mined.
+    Other blocks can verify the proof of work and add it to their
+    chains.
+    """
     for peer in peers:
         url = "{}add_new_block".format(peer)
         requests.post(url, data=json.dumps(block.__dict__, sort_keys=True))
